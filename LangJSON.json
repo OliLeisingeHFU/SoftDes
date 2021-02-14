@@ -1,4 +1,3 @@
-{"languages": [
-                        {  "id":1 , "name":"english"}
-                        ]
-                        }
+[
+	{"id":1 , "name":"english"}
+]

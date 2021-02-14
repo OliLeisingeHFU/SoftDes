@@ -219,47 +219,76 @@ namespace TranslationMemory
                 if (users.First(item => item.username == user && item.password == pw) != null)
                 {
                     currentUser = users.First(item => item.username == user && item.password == pw);
+                    Program.loggedIn = true;
                 }
                 else if (translators.First(item => item.username == user && item.password == pw) != null)
                 {
                     currentUser = translators.First(item => item.username == user && item.password == pw);
+                    Program.loggedIn = true;
                 }
                 else if (admins.First(item => item.username == user && item.password == pw) != null)
                 {
                     currentUser = admins.First(item => item.username == user && item.password == pw);
+                    Program.loggedIn = true;
                 }
                 else
                 {
                     Console.WriteLine("Dieser Benutzer existiert nicht.");
                 }
             }
+            else
+            {
+                Program.loggedIn = false;
+            }
         }
 
         public void register()
         {
+            string user;
+            do
+            {
+                Console.WriteLine("Wählen Sie einen Username:");
+                user = Console.ReadLine();
+            } while (validateUsername(user));
+            Console.WriteLine("Wählen Sie ein Passwort:");
+            string pw = Console.ReadLine();
+            User temp = createUser(user, pw);
+            currentUser = temp;
+            users.Add(temp);
 
         }
 
         public Boolean validateUsername(string username)
         {
-
-            return true;
+            if(users.First(item => item.username == username) == null)
+            {
+                return true;
+            }
+            return false;
         }
 
         public User createUser()
         {
-
             return new User();
         }
-
-        public Admin createAdmin(Admin existingAdmin)
+        public User createUser(string _user, string _pw)
         {
-            return new Admin();
+            return new User(_user, _pw);
+        }
+        public Translator createUser(string _user, string _pw, string _lang)
+        {
+            return new Translator(_user, _pw, _lang);
+        }
+
+        public Admin createAdmin(string _user, string _pw)
+        {
+            return new Admin(_user, _pw);
         }
 
         public void saveUsers()
         {
             string json = JsonConvert.SerializeObject(users);
+            Console.WriteLine(json);
             File.WriteAllText("UserJSON.json", json);
 
             json = JsonConvert.SerializeObject(translators);
@@ -311,7 +340,7 @@ namespace TranslationMemory
             File.WriteAllText("WordTranJSON.json", json);
         }
 
-        public void loadUsers()
+        public void loadWords()
         {
             string readJSON = File.ReadAllText("WordJSON.json");
             words = JsonConvert.DeserializeObject<List<Word>>(readJSON);
@@ -328,22 +357,26 @@ namespace TranslationMemory
     // Program
     class Program
     {
-        private static Boolean loggedIn = false;
+        public static Boolean loggedIn = false;
         private static LoginFactory logFac = new LoginFactory();
+        private static WordFactory wordFac = new WordFactory();
         static void Main(string[] args)
         {
-            while (!loggedIn)
+            do
             {
                 Console.WriteLine("Hallo! Bitte drücken Sie die 0, um sich einzuloggen oder die 1 um sich zu registrieren.");
                 if (Console.ReadLine() == "0")
                 {
                     logFac.login(loggedIn);
                 }
-            }
-            while (loggedIn)
+            } while (!loggedIn);
+            do
             {
+                loggedIn = false;
+            } while (loggedIn);
 
-            }
+            logFac.saveUsers();
+            wordFac.saveWords();
         }
     }
 }
